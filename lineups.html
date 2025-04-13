@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>vLineups - Lineups</title>
+    <link rel="stylesheet" href="styles/main.css"/>
+    <style>
+        :root {
+            --primary: #7289da;
+            --background: #1a1a1a;
+            --card-bg: #2c2f33;
+            --text: #ffffff;
+            --attacking: #ff4d4d;
+            --defending: #ff4d4d;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        
+        header {
+            background-color: var(--card-bg);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+        
+        .back-button {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .back-button:hover {
+            background-color: #677bc4;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .filters-container {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-group label {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .filter-group select {
+            padding: 10px 15px;
+            border-radius: 5px;
+            background-color: var(--background);
+            color: var(--text);
+            border: 1px solid #4a4d52;
+            font-size: 1rem;
+            cursor: pointer;
+            min-width: 200px;
+            transition: all 0.3s;
+        }
+        
+        .filter-group select:hover {
+            border-color: var(--primary);
+        }
+        
+        .role-toggle {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .role-btn {
+            padding: 10px 15px;
+            border-radius: 5px;
+            background-color: var(--background);
+            color: var(--text);
+            border: 1px solid #4a4d52;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .role-btn.active {
+            color: white;
+        }
+        
+        .role-btn.attacking.active {
+            background-color: var(--attacking);
+            border-color: var(--attacking);
+        }
+        
+        .role-btn.defending.active {
+            background-color: var(--defending);
+            border-color: var(--defending);
+        }
+        
+        .selected-agent-display {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 0 auto 20px;
+            max-width: 600px;
+            text-align: center;
+            display: none;
+        }
+        
+        .selected-agent-image {
+            width: 120px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            margin: 0 auto;
+            display: block;
+        }
+        
+        .selected-agent-name {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        
+        .minimap-container {
+            position: relative;
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin: 0 auto;
+            max-width: 800px;
+        }
+        
+        .minimap-container h2 {
+            margin-top: 0;
+            text-align: center;
+        }
+        
+        #minimap {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        #dots-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+        }
+        
+        .dot {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            border: 2px solid white;
+            box-shadow: 0 0 8px rgba(0,0,0,0.7);
+            transition: all 0.3s ease;
+        }
+        
+        .dot:hover {
+            transform: translate(-50%, -50%) scale(1.5);
+            z-index: 20;
+            box-shadow: 0 0 15px rgba(255,255,255,0.8);
+        }
+        
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            color: var(--text);
+            text-align: center;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: auto;
+            z-index: 1000;
+        }
+        
+        .popup h3 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .popup iframe {
+            width: 100%;
+            height: 500px;
+            border-radius: 8px;
+            border: none;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .popup p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .popup .role-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .popup .role-badge.attacking {
+            background-color: var(--attacking);
+        }
+        
+        .popup .role-badge.defending {
+            background-color: var(--defending);
+        }
+        
+        .close-btn {
+            margin-top: 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        
+        .close-btn:hover {
+            background-color: #677bc4;
+        }
+        
+        footer {
+            background-color: var(--card-bg);
+            padding: 20px;
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .filters-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .role-toggle {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .role-btn {
+                width: 48%;
+            }
+            
+            .popup iframe {
+                height: 300px;
+            }
+            
+            .popup {
+                padding: 20px;
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1>Lineups for <span id="map-name">Map</span></h1>
+            <a class="back-button" href="index.html">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back to Maps
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <div class="filters-container">
+            <div class="filter-group">
+                <label for="agent-filter">Filter by Agent:</label>
+                <select id="agent-filter">
+                    <option value="">All Agents</option>
+                    <option value="Sova">Sova</option>
+                    <option value="Viper">Viper</option>
+                    <option value="Brimstone">Brimstone</option>
+                    <option value="Killjoy">Killjoy</option>
+                    <option value="Cypher">Cypher</option>
+                    <option value="Phoenix">Phoenix</option>
+                    <option value="Sage">Sage</option>
+                    <option value="Reyna">Reyna</option>
+                    <option value="Omen">Omen</option>
+                    <option value="Jett">Jett</option>
+                    <option value="Breach">Breach</option>
+                    <option value="Raze">Raze</option>
+                    <option value="Skye">Skye</option>
+                    <option value="Yoru">Yoru</option>
+                    <option value="Astra">Astra</option>
+                    <option value="KAYO">KAY/O</option>
+                    <option value="Gekko">Gekko</option>
+                    <option value="Neon">Neon</option>
+                    <option value="Iso">Iso</option>
+                    <option value="Chamber">Chamber</option>
+                    <option value="Harbor">Harbor</option>
+                    <option value="Clove">Clove</option>
+                    <option value="Deadlock">Deadlock</option>
+                    <option value="Fade">Fade</option>
+                    <option value="Tejo">Tejo</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label>Role:</label>
+                <div class="role-toggle">
+                    <button id="all-role-btn" class="role-btn active" onclick="filterByRole('all')">All</button>
+                    <button id="attacking-btn" class="role-btn attacking" onclick="filterByRole('attacking')">Attacking</button>
+                    <button id="defending-btn" class="role-btn defending" onclick="filterByRole('defending')">Defending</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="selected-agent-display" id="selected-agent-display">
+            <img class="selected-agent-image" id="selected-agent-image" src="" alt="Selected Agent">
+            <div class="selected-agent-name" id="selected-agent-name"></div>
+        </div>
+
+        <div class="minimap-container">
+            <h2>Minimap - <span id="map-view">Attacking</span></h2>
+            <img id="minimap" src="" alt="Minimap" />
+            <div id="dots-container"></div>
+        </div>
+    </main>
+
+    <div id="popup" class="popup">
+        <div id="popup-role-badge" class="role-badge"></div>
+        <h3 id="popup-title"></h3>
+        <iframe id="popup-video" src="" allowfullscreen></iframe>
+        <p id="popup-description"></p>
+        <button class="close-btn" onclick="closePopup()">Close</button>
+
+        
+    </div>
+
+    <footer>
+        <p>vLineups &copy; 2025 | Made for Valorant enthusiasts by Gharam Rawad - AOU Student -</p>
+    </footer>
+
+    <script>
+        // Agent color mapping
+        const agentColors = {
+            'Sova': '#00b5ad',
+            'Viper': '#5ab552',
+            'Brimstone': '#ff6b35',
+            'Killjoy': '#f0e14a',
+            'Cypher': '#f5f5f5',
+            'Phoenix': '#ff8c42',
+            'Sage': '#6de1ff',
+            'Reyna': '#b94eff',
+            'Omen': '#7a5cff',
+            'Jett': '#7bb2d9',
+            'Breach': '#d93b3b',
+            'Raze': '#f9cb40',
+            'Skye': '#6de1a3',
+            'Yoru': '#4d5eff',
+            'Astra': '#b467ff',
+            'KAYO': '#ffffff',
+            'Gekko': '#00ff4d',
+            'Neon': '#1a8cff',
+            'Iso': '#ff4d4d',
+            'Chamber': '#f0e14a',
+            'Harbor': '#00ffb3',
+            'Clove': '#ff66ff',
+            'Deadlock': '#ff66b3',
+            'Fade': '#8a4fff',
+            'Tejo': '#ff9966'
+        };
+
+        // Sample lineup data for all agents
+        const lineupData = {
+            Ascent: {
+                minimap: {
+                    attacking: "assets/images/minimaps/ascent.png",
+                    defending: "assets/images/minimaps/ASCENT-DEF.png"
+                },
+                lineups: [
+                    {
+                        agent: "Sova",
+                        title: "A Site Recon Bolt",
+                        video: "https://www.youtube.com/embed/y-JsYhJAqzc?si=lVTmbQqUvEbNcRXI",
+                        description: "Scan A site from A Main. Stand in the corner near the boxes and aim just a bit next to the corner, 1 charge no bounce",
+                        position: { x: 96, y: 33 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Cubby / Boat Recon Bolt",
+                        video: "https://www.youtube.com/embed/Y8c0lpG3-B8?si=Xb-pcio_Ma9LZUtT",
+                        description: "Scan B Cubby from B Main. Stand in the corner near the boxes and aim at the the P letter, Full charge 1 bounce",
+                        position: { x: 34, y: 36 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Ally Recon Bolt",
+                        video: "https://www.youtube.com/embed/mNE60FnPkdg?si=MU8QvL-swmMVBS2g",
+                        description: "Scan B lane from B lobby. good anti spam, Full charge 1 bounce",
+                        position: { x: 16, y: 39 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Site Recon Bolt",
+                        video: "https://www.youtube.com/embed/Mst0bWSDz-4?si=0H9rJ4rRGcbprjsY",
+                        description: "Scan B site and main from B lobby. Stand next to the 3rd window from the left, aim under the 2nd window from the right, Full charge 1 bounce",
+                        position: { x: 26, y: 23 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Market Recon Bolt",
+                        video: "https://www.youtube.com/embed/MOnboeDkfe8?si=G2eAq0ZeVq-UE_nn",
+                        description: "Scan B market from Top Mid. look at the 2nd line next to the box aim exactly on the 2nd line, Full charge 1 bounce",
+                        position: { x: 35, y: 27 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Market Recon Bolt",
+                        video: "https://www.youtube.com/embed/qtDlYjR2CA4?si=g4MGmIu6wMkSd56s",
+                        description: "Scan B market from B main. Stand in the corner aim at the bottom left of the sign, Full charge 1 bounce",
+                        position: { x: 36, y: 33 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Market Recon Bolt",
+                        video: "https://www.youtube.com/embed/QmFKKgpWDkM?si=aG5p7H_-R66gQlZT",
+                        description: "Full charge 2 bounces",
+                        position: { x: 44, y: 29 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Site Recon Bolt",
+                        video: "https://www.youtube.com/embed/1uUAFZiSlpY?si=mnvTzVeKY8xUpIzs",
+                        description: "full charge 1 bounces",
+                        position: { x: 23, y: 23 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Site / Lane Recon Bolt",
+                        video: "https://www.youtube.com/embed/xqpFZbxGVEQ?si=pM-g3ZXw5ISLy4kW",
+                        description: "Stand in the corner aim the tree, Full charge no bounces",
+                        position: { x: 7, y: 35 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Site Recon Bolt",
+                        video: "https://www.youtube.com/embed/VW6W-flNfCE?si=1FD9bha4z4zXWTUr",
+                        description: "Full charge 1 bounces",
+                        position: { x: 19, y: 23 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "Tree Recon Bolt",
+                        video: "https://www.youtube.com/embed/H8cix8Dtqhg?si=jOYFUxpvcbcKfqLK",
+                        description: "Scan tree from A main. Stand in the corner aim at the top of the tree, Full charge no bounces",
+                        position: { x: 72, y: 38 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "Mid Recon Bolt",
+                        video: "https://www.youtube.com/embed/QuBDObOwfY4?si=kM4eUWGRPER8S740",
+                        description: "Stand in the corner aim just under the line on the wall, Full charge 1 bounce ",
+                        position: { x: 55, y: 47 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "Mid bottom Recon Bolt",
+                        video: "https://www.youtube.com/embed/WtexcyDvMTE?si=m3OB8iK44REH3LYr",
+                        description: "At the stat of the round aim at the bottom of the lamp, Full charge 1 bounce ",
+                        position: { x: 51, y: 39 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "Pizza Recon Bolt",
+                        video: "https://www.youtube.com/embed/R-wXTZL1sRA?si=nojNlN5TxZ0kcSSY",
+                        description: "Stand in the corner , Aim just at the end of the blue line , jump and shoot, Full charge 1 bounce ",
+                        position: { x: 48, y: 29 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "Tree Recon Bolt",
+                        video: "https://www.youtube.com/embed/4qKrJQOqbjI?si=gNQ_Fdms1xyjL4Ij",
+                        description: "Full charge 1 bounce ",
+                        position: { x: 71, y: 40},
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "A Gen Recon Bolt",
+                        video: "https://www.youtube.com/embed/YzfxVEcpWZs?si=Hgzwp88D70WK6XJm",
+                        description: "Recon Bolt for Gen A, Full charge 1 bounce ",
+                        position: { x: 84, y: 29.7 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "A Site Recon Bolt",
+                        video: "https://www.youtube.com/embed/OVFyL_dmsio?si=cn6sTxOZenL9cg1T",
+                        description: "Stand in the corner near the boxes Aim at the blue flag, 1 charge no bounce ",
+                        position: { x: 81, y: 29.5 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "Heaven Recon Bolt",
+                        video: "https://www.youtube.com/embed/jQVPyeBmPJo?si=KTtSNkPxfEfzZ_km",
+                        description: "top right of the box, Full charge 2 bounces ",
+                        position: { x: 89, y: 26 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "A main Recon Bolt",
+                        video: "https://www.youtube.com/embed/1I2n_ryzyCU?si=s1uzXCulnb-kThW4",
+                        description: "Aim at the bottom left of the small window, Full charge 2 bounces ",
+                        position: { x: 88, y: 48 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "A Site Recon Bolt",
+                        video: "https://www.youtube.com/embed/uKaDLiDupHc?si=StbMvlKRi3eAzIHQ",
+                        description: "Stand in the Corner aim at the small Line, 1 charge 2 bounces ",
+                        position: { x: 92, y: 45 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "A Heaven Recon Bolt",
+                        video: "https://www.youtube.com/embed/pYRUcht9KUo?si=W5DYfWB3RnZWXeCs",
+                        description: "Stand in the corner btween the boxes aim at the blue flag, 1.5 charge no bounce ",
+                        position: { x: 81.6, y: 26 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "A Defualt Shock Dart",
+                        video: "https://www.youtube.com/embed/JDpbXVbqcPc?si=HABSUrSGz9lBt0HD",
+                        description: "For the Defualt Plant, 1 at the top of the line, 1 in the middle of it ",
+                        position: { x: 83.5, y: 37 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Defualt Shock Dart",
+                        video: "https://www.youtube.com/embed/K6qYlYsmBAk?si=pLHCZLGZEzJiS0Xz",
+                        description: "For the Defualt Plant",
+                        position: { x: 12, y: 32 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "A Main Shock Dart",
+                        video: "https://www.youtube.com/embed/ee9sP5i8nXk?si=JguPRBZpIozi2hew",
+                        description: "Aim next to the small window to the left, 2 charges 2 bounces ",
+                        position: { x: 89, y: 46 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Main Shock Dart",
+                        video: "https://www.youtube.com/embed/pB6hF9GOocs?si=cr28bS3S3n4-i1cv",
+                        description: "For the trips on B Main ",
+                        position: { x: 27, y: 38 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "Pizza Shock Dart",
+                        video: "https://www.youtube.com/embed/aqW7cehZFNU?si=kU1LtOJy_kc2aYor",
+                        description: "Keep the top of the left click icon on the middle of the gray box, 1.3 charge  ",
+                        position: { x: 53, y: 33 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "Under Heaven Recon Bolt",
+                        video: "https://www.youtube.com/embed/uIUEFwQIjME?si=yOFfnNYKOKw33itw",
+                        description: "aim at the top right corner, Full charge 2 bounces ",
+                        position: { x: 10, y: 79 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Link Recon Bolt",
+                        video: "https://www.youtube.com/embed/-uFEeh3zmTA?si=yocc_XWLpBpBl5Qa",
+                        description: "let the 2nd line of the charge on the bottom right of the window , Full charge 1 bounce ",
+                        position: { x: 64, y: 47 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Main Recon Bolt",
+                        video: "https://www.youtube.com/embed/iz7QjM8GZH4?si=zSxIVxukmbCkhfs-",
+                        description: "Full charge 1 bounce ",
+                        position: { x: 83, y: 54 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Market Recon Bolt",
+                        video: "https://www.youtube.com/embed/mGuSVLPrgAE?si=k5_1CEWxr3qCBy1c",
+                        description: "0.2 charge no bounce ",
+                        position: { x: 62, y: 72 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Site / Lane Recon Bolt",
+                        video: "https://www.youtube.com/embed/zET0-rIYWUg?si=kKZ8FvBH0mHONm-5",
+                        description: "Full charge 1 bounce ",
+                        position: { x: 83, y: 67 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "A Lobby Recon Bolt",
+                        video: "https://www.youtube.com/embed/I4wraSWxZvk?si=ee1n_Pd5b090lkjH",
+                        description: "Top left of the green sign, 1.6 charge 1 bounce ",
+                        position: { x: 22, y: 38 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "Tree Recon Bolt",
+                        video: "https://www.youtube.com/embed/WymSPNHTeGw?si=LGJxbfg4F6rDxQSt",
+                        description: "at the end of the rock, One click no bounce ",
+                        position: { x: 34, y: 60 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Lobby Recon Bolt",
+                        video: "https://www.youtube.com/embed/OMGDOamvAYw?si=TuSvF7uVzIoShmxA",
+                        description: "Jump shoot, Full charge 1 bounce ",
+                        position: { x: 74, y: 41 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "A Site Recon Bolt",
+                        video: "https://www.youtube.com/embed/t4Ouxd6W4uI?si=u3semTDFdqEM1mT6",
+                        description: "2 charge no bounce ",
+                        position: { x: 4, y: 64 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "B Main Shock Dart",
+                        video: "https://www.youtube.com/embed/sQOhdNVwZRM?si=ibmASJINSCUneMBr",
+                        description: "Double B Main Shock Dart",
+                        position: { x: 81, y: 56 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "A Main Shock Dart",
+                        video: "https://www.youtube.com/embed/xpEzmm803gg?si=kJyK30SUoIoDiYeJ",
+                        description: "Double A Main Shock Dart",
+                        position: { x: 25.5, y: 52 },
+                        role: "defending"
+                    },
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    {
+                        agent: "Breach",
+                        title: "B Site FlashPoint",
+                        video: "https://www.youtube.com/embed/fx-zsfXuItE?si=IcdOuF7TKMC_Zd7g",
+                        description: "Flash for B site from B Main.",
+                        position: { x: 15, y: 37 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Breach",
+                        title: "Logs Aftershock",
+                        video: "https://www.youtube.com/embed/4FjL_ChTyXM?si=zusQmTx9e7itokhC",
+                        description: "Aftershock for logs from tiles",
+                        position: { x: 35, y: 35 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Breach",
+                        title: "CT FlashPoint",
+                        video: "https://www.youtube.com/embed/qFvmFduUSbE?si=z1aOU6ETBS83sViW",
+                        description: "Post plant flash for CT from B site",
+                        position: { x: 27, y: 20 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Breach",
+                        title: "A Site FlashPoint",
+                        video: "https://www.youtube.com/embed/vZwKiO5tznM?si=P2qbNDNuAe6XtydP",
+                        description: "Flash for A site from A Main.",
+                        position: { x: 84, y: 45 },
+                        role: "attacking"
+                    },
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    {
+                        agent: "clove",
+                        title: "B Main Meddle",
+                        video: "https://www.youtube.com/embed/A4fUcW6XyaQ?si=jLGwVvsOo8MGxFyA",
+                        description: "Meddle for B main from B Market Stairs.",
+                        position: { x: 81.7, y: 57 },
+                        role: "defending"
+                    },
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    {
+                        agent: "chamber",
+                        title: "Tp logs",
+                        video: "https://www.youtube.com/embed/2UQpIXTRDck?si=KV6JjR5cgjXl-kOT",
+                        description: "TP to peak Mid to B logs.",
+                        position: { x: 65, y: 70 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "chamber",
+                        title: "Tp B Lobby",
+                        video: "https://www.youtube.com/embed/VyqFuGqnm_w?si=zYJMBvTIfuBSs_tF",
+                        description: "TP to peak B Main /Market /Ct /Stairs, to B Lobby.",
+                        position: { x: 24, y: 52 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "chamber",
+                        title: "TP Garden",
+                        video: "https://www.youtube.com/embed/sKG3XmF9IY4?si=vSHutYAHKu8cC440",
+                        description: "TP to peak B Link to Garden.",
+                        position: { x: 36.5, y: 73 },
+                        role: "defending"
+                    },
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    {
+                        agent: "Brimstone",
+                        title: "B Corner Molly",
+                        video: "https://www.youtube.com/embed/m-iRXGx1Uhg?si=SGsmgjFma8cs-X5m",
+                        description: "Molly for The Corner Plant. Stand a bit away from the corner and aim at the right of 1st the window.",
+                        position: { x: 8.5, y: 34.5 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Brimstone",
+                        title: "B Defualt Molly",
+                        video: "https://www.youtube.com/embed/daZvRRH7aH0?si=K0jD_dGsmo13gmwE",
+                        description: "Molly for The Defualt Plant From B Lobby. Stand a bit away from the corner and aim at the right of 1st the window.",
+                        position: { x: 12, y: 32 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Brimstone",
+                        title: "B Defualt Molly",
+                        video: "https://www.youtube.com/embed/iUnPy3ghvxA?si=WnZiW3Ik0dTozlX1",
+                        description: "Molly for The Defualt Plant To Take Control From CT. Stand a bit away from the corner and aim at the right of 1st the window.",
+                        position: { x: 88, y: 73 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Brimstone",
+                        title: "A Corner Molly",
+                        video: "https://www.youtube.com/embed/fw97Tsm06Ks?si=mjGc0Op9yDZKchSS",
+                        description: "Molly for The Corner Plant From A Lobby.",
+                        position: { x: 96, y: 33 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Brimstone",
+                        title: "A Defualt Molly",
+                        video: "https://www.youtube.com/embed/KzlFeXCWPJw?si=q_3FNtX2rqdSStG2",
+                        description: "Molly for The Defualt Plant from wine.",
+                        position: { x: 83.6, y: 37 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Brimstone",
+                        title: "A Defualt Molly",
+                        video: "https://www.youtube.com/embed/PLM45F4-9Ms?si=DTRBBwyUGZAu1Tim",
+                        description: "Molly for The Defualt Plant from Heaven.",
+                        position: { x: 16.6, y: 68 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Brimstone",
+                        title: "A Dice Molly",
+                        video: "https://www.youtube.com/embed/0l6WbmTG9GI?si=5OEunIEfLGobdlCR",
+                        description: "Molly for The Dice Plant from A Main.",
+                        position: { x: 90.5, y: 35.5 },
+                        role: "attacking"
+                    },
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    {
+                        agent: "Cypher",
+                        title: "A Site Trapwire",
+                        video: "https://www.youtube.com/embed/_j1IdK3M5KY?si=r2nBhkB3tRx1GNCz",
+                        description: "Trapwire for A Site / tree. Place it on the corner of the wall to catch enemies entering tree.",
+                        position: { x: 20, y: 63 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "B Site Camera",
+                        video: "https://www.youtube.com/embed/fnKo9us5oqw?si=eOL2XbBKv4zVVS2l",
+                        description: "camera for B Site. Place it on the Top of the wall to catch enemies entering B site.",
+                        position: { x: 69.5, y: 65 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "B Stairs Trapwire",
+                        video: "https://www.youtube.com/embed/-UYAj4m84tw?si=JTc_Opc3jWxZeZpT",
+                        description: "Trapwire for B Stairs. Place it on the corner of the wall to catch enemies entering B site.",
+                        position: { x: 78, y: 80 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "B Lane Trapwire",
+                        video: "https://www.youtube.com/embed/sibIz5h2QsE?si=dImAGQZQn0_Cj5qa",
+                        description: "Trapwire for B Lane. Place it on the wall to catch enemies entering B site.",
+                        position: { x: 86, y: 68 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "A Site Cage",
+                        video: "https://www.youtube.com/embed/OSP82FJqJ4U?si=hkeRjBPI8J1snmQA",
+                        description: "One Way Cage for A Site. You can see enimies but they cant see you",
+                        position: { x: 13.5, y: 60 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "B Site Cage",
+                        video: "https://www.youtube.com/embed/PqE1aTYsxEg?si=hv080Uvs2otraGK3",
+                        description: "One Way Cage for B Site. You can see enimies but they cant see you",
+                        position: { x: 67, y: 66 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "B Site Cage",
+                        video: "https://www.youtube.com/embed/t643rlXfjGs?si=EPeirEh12GUXRwip",
+                        description: "One Way Cage for B Site. You can see enimies but they cant see you",
+                        position: { x: 72, y: 66 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "A Tree Cage",
+                        video: "https://www.youtube.com/embed/lfQfB0S6K3g?si=KnWn8r4MFOa-UpuZ",
+                        description: "Cage for A Tree. Block view from Tree to site.",
+                        position: { x: 78, y: 41.8 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "B CT Cage",
+                        video: "https://www.youtube.com/embed/A8UuZwo4ecM?si=NW5oatvQ1UWuIE0b",
+                        description: "Cage for B CT. Block view from CT to site.",
+                        position: { x: 30, y: 22 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "Mid Bottom Cage",
+                        video: "https://www.youtube.com/embed/EiwrfpHIuk8?si=8rvTEyCco2us6PrB",
+                        description: "Cage for Mid Bottom. Block view from Mid Bottom.",
+                        position: { x: 49, y: 45 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "B Site Trapwire",
+                        video: "https://www.youtube.com/embed/-Aazs9RuYHw?si=KSKk8kyrnv6hN_EW",
+                        description: "Trapwire for B Site. Place it on the corner of the white square on the wall to catch enemies entering B site.",
+                        position: { x: 74, y: 69 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "A Site Cage",
+                        video: "https://www.youtube.com/embed/UtzJG20xbFY?si=pv0-yKNdl0VPzSDc",
+                        description: "One Way Cage for A Site. You can see enimies but they cant see you",
+                        position: { x: 10, y: 60 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "A Site Camera",
+                        video: "https://www.youtube.com/embed/-n-1p-oVvrg?si=FEPeucuyYp8Mudfe",
+                        description: "camera for A Site. Place it on the Top of the left wall to catch enemies entering A site or tree.",
+                        position: { x: 4, y: 65 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "A Heaven Trapwire",
+                        video: "https://www.youtube.com/embed/haeDnSWnKnw?si=s8aXpZojOCFCDPAS",
+                        description: "Trapwire for A Heaven. Place it on the corner of the Gen to catch enemies entering A site from heaven.",
+                        position: { x: 88, y: 27 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "A Site Trapwire",
+                        video: "https://www.youtube.com/embed/ygyyHYyACxM?si=3iFOQmTW-G0svcsG",
+                        description: "Trapwire for A Site. Place it on the boxes near A Main to catch enemies entering A site.",
+                        position: { x: 12, y: 61 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "A Site Trapwire",
+                        video: "https://www.youtube.com/embed/r5DVh6C9d24?si=nF_51GALBjX14sbH",
+                        description: "Trapwire for A Site. Place it on the corner of the gen to catch enemies entering A site.",
+                        position: { x: 11, y: 65 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Cypher",
+                        title: "B Stairs Trapwire",
+                        video: "https://www.youtube.com/embed/-UYAj4m84tw?si=JTc_Opc3jWxZeZpT",
+                        description: "Trapwire for B Stairs. Take contol for post plant.",
+                        position: { x: 22, y: 25 },
+                        role: "attacking",
+                    },
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    {
+                        agent: "Deadlock",
+                        title: "B Main Barrier",
+                        video: "https://www.youtube.com/embed/rsTI12h7lUs?si=KMm6Mkg_noS2pBPM",
+                        description: "Barrier for B Main, From B stairs.",
+                        position: { x: 70.5, y: 65 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Deadlock",
+                        title: "B Main Gravnet",
+                        video: "https://www.youtube.com/embed/nIJPMsrExeM?si=uKT3RaZ-elVnqadZ",
+                        description: "Gravnet for B Main, From B out market.",
+                        position: { x: 79, y: 63 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Deadlock",
+                        title: "B Site Annihilation",
+                        video: "https://www.youtube.com/embed/rsTI12h7lUs?si=KMm6Mkg_noS2pBPM",
+                        description: "Annihilation (ULT) for B Site, From B CT.",
+                        position: { x: 87, y: 76 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Deadlock",
+                        title: "B Site Annihilation",
+                        video: "https://www.youtube.com/embed/rsTI12h7lUs?si=KMm6Mkg_noS2pBPM",
+                        description: "Annihilation (ULT) for B Site, From B CT.",
+                        position: { x: 13, y: 28 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Deadlock",
+                        title: "B CT Barrier",
+                        video: "https://www.youtube.com/embed/zp59r_TqXEk?si=ilX8Nwr7kPNNih7o",
+                        description: "Barrier for B CT, From B Main.",
+                        position: { x: 30, y: 23 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Deadlock",
+                        title: "B Market Barrier",
+                        video: "https://www.youtube.com/embed/RJ2kvSrQNxE?si=w5NDEUVwJ-jR7mwk",
+                        description: "Barrier for B Market, From B Main.",
+                        position: { x: 37, y: 31.2 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Deadlock",
+                        title: "Cubby Gravnet",
+                        video: "https://www.youtube.com/embed/WpRiL3iTE5U?si=OPUhL2_1coTDFMu_",
+                        description: "Gravnet for Cubby, From A lobby.",
+                        position: { x: 66, y: 49 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Deadlock",
+                        title: "A Site Annihilation",
+                        video: "https://www.youtube.com/embed/RWuyyRbTIaQ?si=NxZCOhxRDI4XW0t8",
+                        description: "Annihilation (ULT) for A Site Defualt plant, From A Main.",
+                        position: { x: 83.5, y: 37 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Deadlock",
+                        title: "B Site Gravnet",
+                        video: "https://www.youtube.com/embed/rwPzhBTVaH8?si=zgnyK3rOO6O97Vs4",
+                        description: "Gravnet for B Site, From B Main.",
+                        position: { x: 11, y: 31 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Deadlock",
+                        title: "B Site Annihilation",
+                        video: "https://www.youtube.com/embed/XjdSZKKn12E?si=uK0IM3Fckxztpi_y",
+                        description: "Annihilation (ULT) for B Site, From B Main.",
+                        position: { x: 14, y: 32 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Deadlock",
+                        title: "B Stairs Gravnet",
+                        video: "https://www.youtube.com/embed/eXLCuyBQ6pU?si=COJGEc2rMQp4zCoN",
+                        description: "Gravnet for B Stairs, From B Main.",
+                        position: { x: 23, y: 24.5 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Deadlock",
+                        title: "A Gen Gravnet",
+                        video: "https://www.youtube.com/embed/X7NtdUshKPE?si=bfo_4EDEd93mKCfa",
+                        description: "Gravnet for A Site gen plant, From A Ramps.",
+                        position: { x: 16.7, y: 68 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Deadlock",
+                        title: "B Site Gravnet",
+                        video: "https://www.youtube.com/embed/ZqtqfmoJwhI?si=cWztkOQPUg3-7o-M",
+                        description: "Gravnet for B Site, From B Main.",
+                        position: { x: 78, y: 68 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Deadlock",
+                        title: "A Backsite Gravnet",
+                        video: "https://www.youtube.com/embed/DpGG_ptUvUA?si=mLzGS-FNp8ZALzFg",
+                        description: "Gravnet for A Backsite, From A Main.",
+                        position: { x: 90, y: 32 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Deadlock",
+                        title: "A Main Barrier",
+                        video: "https://www.youtube.com/embed/EpKqCU80J9I?si=-1r-rnkYKJG7IXrj",
+                        description: "Barrier for A Main, From gen.",
+                        position: { x: 12, y: 60 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Deadlock",
+                        title: "A Gen Annihilation",
+                        video: "https://www.youtube.com/embed/IjLl5Nd30Dk?si=I3a4kigKtb43I-7p",
+                        description: "Annihilation (ULT) for A Site gen, From A Ramps.",
+                        position: { x: 17, y: 75 },
+                        role: "defending",
+                    },
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    {
+                        agent: "Fade",
+                        title: "A Site Haunt",
+                        video: "https://www.youtube.com/embed/hxOtRAgBUEo?si=CHwl27BP4Fc3SMJf",
+                        description: "Haunt for A Site. Reveals A site.",
+                        position: { x: 86, y: 45 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Fade",
+                        title: "A Site Haunt",
+                        video: "https://www.youtube.com/embed/NEIEr2gCTSs?si=sc5lFvQPXcU2g4Ff",
+                        description: "Haunt for A Site. Reveals A site. From A Main",
+                        position: { x: 80, y: 38 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Fade",
+                        title: "A Main/Lobby Haunt",
+                        video: "https://www.youtube.com/embed/Pow9gPqAMyw?si=0T1zilnr_zMzYF_v",
+                        description: "Haunt for A Site. Reveals A Main and A Lobby. From A Site",
+                        position: { x: 27, y: 52 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Fade",
+                        title: "B Lobby Haunt",
+                        video: "https://www.youtube.com/embed/fkL81qlAgxQ?si=mgZ3TPXt7LCVXJ4I",
+                        description: "Haunt for B Lobby. Reveals B Lobby.",
+                        position: { x: 81.7, y: 54 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Fade",
+                        title: "B Site Haunt",
+                        video: "https://www.youtube.com/embed/BmNzttbUmiQ?si=BdyP4HA2GT8WbiXF",
+                        description: "Haunt for B Site. Reveals B Site, From B Lobby",
+                        position: { x: 18, y: 39 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Fade",
+                        title: "B CT/Site Haunt",
+                        video: "https://www.youtube.com/embed/HKaXdWyzmTQ?si=KxcGyPkej20IzdIf",
+                        description: "Haunt for B CT/Site. Reveals B Site and CT, From B Lobby",
+                        position: { x: 27, y: 23 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Fade",
+                        title: "B Stairs Seize",	
+                        video: "https://www.youtube.com/embed/LGrqR49gkrk?si=ekQhSc9vLWmdidf9",
+                        description: "Seize for B Stairs. From B Main.",
+                        position: { x: 23, y: 24.5 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Fade",
+                        title: "Mid Haunt",
+                        video: "https://www.youtube.com/embed/8iqBa9EIchk?si=77BSyVr_k2vYrTOg",
+                        description: "Haunt for Mid. Reveals Mid and Pizza, From B Link",
+                        position: { x: 46, y: 37 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Fade",
+                        title: "Mid Bottom/Cubby Haunt",
+                        video: "https://www.youtube.com/embed/zKtos_EaBgc?si=1mJBb2RgHWhmRbuK",
+                        description: "Haunt for Mid Bottom/Cubby. Reveals Mid Bottom and Cubby, From B Link",
+                        position: { x: 55, y: 46 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Fade",
+                        title: "Cubby Haunt",
+                        video: "https://www.youtube.com/embed/Gk_KBehZHyQ?si=idRPEEq9Z8x7E_hQ",
+                        description: "Haunt for Cubby. Reveals Cubby, From A Lobby",
+                        position: { x: 69, y: 51 },
+                        role: "attacking",
+                    },
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    //11111111111111111111111111111111111111111111111111111111111111111111111
+                    
+                    {
+                        agent: "Killjoy",
+                        title: "A Site Alarmbot",
+                        video: "https://www.youtube.com/embed/ZqtqfmoJwhI?si=MW1BEs15LquLExli",
+                        description: "Alarmbot for A Site. Place it on the corner of the wall to catch enemies entering A site.",
+                        position: { x: 20, y: 76 },
+                        role: "defending",
+                    },
+                    {
+                        agent: "Killjoy",
+                        title: "B site Molly",
+                        video: "https://www.youtube.com/embed/fnKo9us5oqw?si=eOL2XbBKv4zVVS2l",
+                        description: "Molly for B site. Place it on the corner of the wall to catch enemies entering B site.",
+                        position: { x: 69.5, y: 65 },
+                        role: "attacking",
+                    },
+                    {
+                        agent: "Viper",
+                        title: "B Site Snake Bite",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Molly for B site control. Throw from B main to block the entrance to site.",
+                        position: { x: 60, y: 30 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Killjoy",
+                        title: "A Site Nanoswarm",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Post-plant molly for A site. Place it in the default plant spot for maximum coverage.",
+                        position: { x: 38, y: 48 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Omen",
+                        title: "Mid Smoke",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "One-way smoke for mid control. Stand near the boxes and aim at the top of the window.",
+                        position: { x: 30, y: 30 },
+                        role: "defending"
+                    },
+                    
+                ]
+            },
+            Haven: {
+                minimap: {
+                    attacking: "assets/images/minimaps/haven.png",
+                    defending: "assets/images/minimaps/HAVEN-DEF.png"
+                },
+                lineups: [
+                    {
+                        agent: "Sova",
+                        title: "A Site Shock Dart",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Early damage on A site. Aim at the corner of the roof for maximum coverage.",
+                        position: { x: 25, y: 40 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Viper",
+                        title: "C Site Snake Bite",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Molly for C site control. Perfect for post-plant situations.",
+                        position: { x: 60, y: 30 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Brimstone",
+                        title: "C Site Molly",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Post-plant molly for C site. Covers the entire default plant spot.",
+                        position: { x: 65, y: 35 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Killjoy",
+                        title: "B Site Setup",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Turret and alarm bot placement. Covers both entrances to B site.",
+                        position: { x: 40, y: 50 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Jett",
+                        title: "B Site Setup",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Turret and alarm bot placement. Covers both entrances to B site.",
+                        position: { x: 30, y: 55 },
+                        role: "defending"
+                    }
+                ]
+            },
+            Pearl: {
+                minimap: {
+                    attacking: "assets/images/minimaps/pearl.png",
+                    defending: "assets/images/minimaps/PEARL-DEF.png"
+                },
+                lineups: [
+                    {
+                        agent: "Viper",
+                        title: "A Site Toxic Screen",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Wall that covers A Main entrance and splits A site in half.",
+                        position: { x: 30, y: 40 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Brimstone",
+                        title: "B Site Smokes",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Three smokes to block off B site entrances from B Link and B Main.",
+                        position: { x: 60, y: 50 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "Mid Recon Bolt",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Scans mid area from Art to Doors for maximum information.",
+                        position: { x: 50, y: 30 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Killjoy",
+                        title: "A Site Nanoswarm",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Post-plant molly for A site default plant spot.",
+                        position: { x: 35, y: 45 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Omen",
+                        title: "Mid One-Way Smoke",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "One-way smoke for mid control near Art area.",
+                        position: { x: 45, y: 35 },
+                        role: "defending"
+                    }
+                ]
+            },
+            Icebox: {
+                minimap: {
+                    attacking: "assets/images/minimaps/icebox.png",
+                    defending: "assets/images/minimaps/ICEBOX-DEF.png"
+                },
+                lineups: [
+                    {
+                        agent: "Sova",
+                        title: "A Site Recon Bolt",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Scans A site from A Main, covering default plant spot and nest area.",
+                        position: { x: 35, y: 40 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Viper",
+                        title: "B Site Snake Bite",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Molly for post-plant on B site, covers default plant spot.",
+                        position: { x: 65, y: 50 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Killjoy",
+                        title: "A Site Turret",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Turret placement that covers A site entrance from A Main.",
+                        position: { x: 40, y: 45 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Brimstone",
+                        title: "B Site Molly",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Post-plant molly for B site default plant spot.",
+                        position: { x: 60, y: 55 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sage",
+                        title: "Mid Wall",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Wall that blocks mid entrance from Kitchen to B site.",
+                        position: { x: 50, y: 30 },
+                        role: "defending"
+                    }
+                ]
+            },
+            Fracture: {
+                minimap: {
+                    attacking: "assets/images/minimaps/fracture.png",
+                    defending: "assets/images/minimaps/FRACTURE-DEF.png"
+                },
+                lineups: [
+                    {
+                        agent: "Brimstone",
+                        title: "A Site Smokes",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Three smokes to block off A site entrances from A Main and A Drop.",
+                        position: { x: 30, y: 40 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Viper",
+                        title: "B Site Toxic Screen",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Wall that covers B Main entrance and splits B site in half.",
+                        position: { x: 70, y: 50 },
+                        role: "attacking"
+                    },
+                    {
+                        agent: "Sova",
+                        title: "Dish Recon Bolt",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Scans Dish area from Arcade for maximum information.",
+                        position: { x: 50, y: 30 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Killjoy",
+                        title: "A Site Nanoswarm",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "Post-plant molly for A site default plant spot.",
+                        position: { x: 35, y: 45 },
+                        role: "defending"
+                    },
+                    {
+                        agent: "Omen",
+                        title: "B Site One-Way Smoke",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                        description: "One-way smoke for B site control near B Tower.",
+                        position: { x: 65, y: 55 },
+                        role: "defending"
+                    }
+                ]
+            }
+        };
+
+        let currentMap = '';
+        let currentAgent = '';
+        let currentRole = 'all';
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentMap = urlParams.get('map');
+            currentAgent = urlParams.get('agent') || '';
+            currentRole = urlParams.get('role') || 'all';
+            
+            
+            const agentFilter = document.getElementById('agent-filter');
+            if (agentFilter) {
+                agentFilter.value = currentAgent;
+                agentFilter.addEventListener('change', filterByAgent);
+                
+                
+                if (currentAgent) {
+                    updateAgentDisplay(currentAgent);
+                }
+            }
+
+           
+            updateRoleButtons();
+            renderLineups();
+        });
+
+        function updateRoleButtons() {
+            document.getElementById('all-role-btn').classList.remove('active');
+            document.getElementById('attacking-btn').classList.remove('active');
+            document.getElementById('defending-btn').classList.remove('active');
+            
+            if (currentRole === 'attacking') {
+                document.getElementById('attacking-btn').classList.add('active');
+            } else if (currentRole === 'defending') {
+                document.getElementById('defending-btn').classList.add('active');
+            } else {
+                document.getElementById('all-role-btn').classList.add('active');
+               
+                currentRole = 'attacking';
+                document.getElementById('attacking-btn').classList.add('active');
+            }
+        }
+
+        function updateAgentDisplay(agent) {
+            const agentDisplay = document.getElementById('selected-agent-display');
+            const agentImage = document.getElementById('selected-agent-image');
+            const agentName = document.getElementById('selected-agent-name');
+            
+            agentImage.src = `assets/images/agents/${agent}.png`;
+            agentImage.alt = agent;
+            agentName.textContent = agent;
+            agentDisplay.style.display = 'block';
+        }
+
+        function filterByAgent() {
+            const agentFilter = document.getElementById('agent-filter');
+            currentAgent = agentFilter.value;
+            const agentDisplay = document.getElementById('selected-agent-display');
+            
+            if (currentAgent) {
+                updateAgentDisplay(currentAgent);
+            } else {
+                agentDisplay.style.display = 'none';
+            }
+            
+            updateUrl();
+            renderLineups();
+        }
+
+        function filterByRole(role) {
+            currentRole = role;
+            updateRoleButtons();
+            updateUrl();
+            renderLineups();
+        }
+
+        function updateUrl() {
+            const newUrl = new URL(window.location);
+            
+            if (currentAgent) {
+                newUrl.searchParams.set('agent', currentAgent);
+            } else {
+                newUrl.searchParams.delete('agent');
+            }
+            
+            if (currentRole && currentRole !== 'all') {
+                newUrl.searchParams.set('role', currentRole);
+            } else {
+                newUrl.searchParams.delete('role');
+            }
+            
+            window.history.pushState({}, '', newUrl);
+        }
+
+        function renderLineups() {
+            const mapNameEl = document.getElementById('map-name');
+            const minimapEl = document.getElementById('minimap');
+            const dotsContainerEl = document.getElementById('dots-container');
+            const mapViewEl = document.getElementById('map-view');
+
+            if (!currentMap || !lineupData[currentMap]) {
+                mapNameEl.textContent = "Unknown Map";
+                minimapEl.alt = "Minimap not available";
+                minimapEl.src = "";
+                dotsContainerEl.innerHTML = '';
+                return;
+            }
+
+            const { minimap, lineups } = lineupData[currentMap];
+            
+            mapNameEl.textContent = currentMap;
+            
+            
+            let minimapSrc;
+            let viewText = "Attacking View";
+            
+            if (currentRole === 'defending' && minimap.defending) {
+                minimapSrc = minimap.defending;
+                viewText = "Defending View";
+            } else {
+               
+                minimapSrc = minimap.attacking;
+                viewText = "Attacking View";
+            }
+            
+            minimapEl.src = minimapSrc;
+            minimapEl.alt = `${currentMap} ${viewText}`;
+            mapViewEl.textContent = viewText;
+            dotsContainerEl.innerHTML = '';
+
+            
+            const filteredLineups = lineups.filter(lineup => {
+                const agentMatch = !currentAgent || lineup.agent.toLowerCase() === currentAgent.toLowerCase();
+                const roleMatch = currentRole === 'all' || lineup.role === currentRole;
+                return agentMatch && roleMatch;
+            });
+
+            
+            filteredLineups.forEach(lineup => {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                
+                dot.style.backgroundColor = agentColors[lineup.agent] || '#ff0000';
+                dot.style.border = "2px solid white";
+                
+                dot.style.left = `${lineup.position.x}%`;
+                dot.style.top = `${lineup.position.y}%`;
+                dot.title = `${lineup.agent}: ${lineup.title} (${lineup.role})`;
+                dot.setAttribute('data-agent', lineup.agent);
+                dot.setAttribute('data-role', lineup.role);
+                dot.onclick = () => showPopup(lineup);
+                dotsContainerEl.appendChild(dot);
+            });
+        }
+
+        function showPopup(lineup) {
+            const popupEl = document.getElementById('popup');
+            const popupTitleEl = document.getElementById('popup-title');
+            const popupVideoEl = document.getElementById('popup-video');
+            const popupDescriptionEl = document.getElementById('popup-description');
+            const popupRoleBadge = document.getElementById('popup-role-badge');
+
+            
+            popupRoleBadge.textContent = lineup.role === 'attacking' ? 'Attacking' : 'Defending';
+            popupRoleBadge.className = `role-badge ${lineup.role}`;
+
+            popupTitleEl.textContent = `${lineup.agent}: ${lineup.title}`;
+            popupVideoEl.src = lineup.video;
+            popupDescriptionEl.textContent = lineup.description;
+            popupEl.style.display = 'block';
+            
+            
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.backgroundColor = 'rgba(0,0,0,0.7)';
+            overlay.style.zIndex = '999';
+            overlay.id = 'popup-overlay';
+            overlay.onclick = closePopup;
+            document.body.appendChild(overlay);
+            
+           
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePopup() {
+            const popupEl = document.getElementById('popup');
+            const popupVideoEl = document.getElementById('popup-video');
+            const overlay = document.getElementById('popup-overlay');
+            
+            popupEl.style.display = 'none';
+            popupVideoEl.src = "";
+            
+            if (overlay) {
+                overlay.remove();
+            }
+            
+            
+            document.body.style.overflow = '';
+        }
+
+        window.filterByAgent = filterByAgent;
+        window.filterByRole = filterByRole;
+        window.closePopup = closePopup;
+    </script>
+</body>
+</html>

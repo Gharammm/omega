@@ -1,0 +1,136 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1a1a1a;
+    color: white;
+    text-align: center;
+}
+
+header {
+    background-color: #2c2f33;
+    padding: 1em 0;
+}
+
+.map-grid {
+    display: flex;
+    justify-content: center;
+    gap: 1.5em;
+    margin-top: 2em;
+}
+
+.map-card {
+    background-color: #2c2f33;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.map-card img {
+    width: 100%;
+}
+
+.lineup iframe {
+    width: 100%;
+    height: 300px;
+    border-radius: 10px;
+}
+
+footer {
+    margin-top: 3em;
+    padding: 1em;
+    background-color: #2c2f33;
+}
+
+.rotate-map {
+    transform: rotate(180deg);
+}
+
+#minimap {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ccc;
+    display: block;
+    margin: 10px auto;
+}
+
+/* Agent Filter Styles */
+.agent-filter {
+    background-color: #2c2f33;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px auto;
+    max-width: 600px;
+}
+
+.agent-filter label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.agent-filter select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    background-color: #1a1a1a;
+    color: white;
+    border: 1px solid #4a4d52;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Dot Styles */
+.dot {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dot:hover {
+    transform: translate(-50%, -50%) scale(1.3);
+    box-shadow: 0 0 10px white;
+}
+
+/* Selected Agent Display */
+.selected-agent-display {
+    background-color: #2c2f33;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 0 auto 20px;
+    max-width: 600px;
+    text-align: center;
+    display: none;
+}
+
+.selected-agent-image {
+    width: 120px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    margin: 0 auto;
+    display: block;
+}
+
+.selected-agent-name {
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #7289da;
+}
+
+/* Pulse animation for better visibility */
+@keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.2); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+.dot.highlight {
+    animation: pulse 1.5s infinite;
+
+    
+}
